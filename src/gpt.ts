@@ -49,7 +49,7 @@ export function useGpt(session: Session<never, never>): (message: string) => Pro
   systemPrompt.content = currentConfig.systemPrompt
   systemPrompt.content = systemPrompt.content.replaceAll(
     '{DATE}',
-    dayjs().format('YYYY-MM-DD HH:mm')
+    dayjs().format('YYYY-MM-DD HH:mm:ss')
   )
 
   let context: Array<ContextRecord> = []
@@ -61,12 +61,14 @@ export function useGpt(session: Session<never, never>): (message: string) => Pro
 
   const ask = async (message: string): Promise<string> => {
     const last = context[context.length - 1]
-    if (new Date().getTime() - last.addTime.getTime() > currentConfig.contextTimeout) {
+    if (new Date().getTime() - last.addTime.getTime() > currentConfig.contextTimeout * 60 * 1000) {
       // Context is outdated.
       context = initContext(session)
     }
 
-    const openai = new OpenAI({ apiKey: getKey(), timeout: 10 * 1000 })
+    const apiKey = getKey()
+
+    const openai = new OpenAI({ apiKey, timeout: 10 * 1000 })
 
     pushContextRecord(context, {
       role: 'user',
@@ -75,8 +77,12 @@ export function useGpt(session: Session<never, never>): (message: string) => Pro
 
     const completion = await openai.chat.completions.create({
       messages: context.map((record) => record.data),
-      model: 'gpt-3.5-turbo-16k-0613',
-      presence_penalty: -1.6,
+      model: currentConfig.gptModel,
+      temperature: currentConfig.gptTemperature,
+      top_p: currentConfig.gptTopP,
+      max_tokens: currentConfig.gptMaxTokens,
+      presence_penalty: currentConfig.gptPresencePenalty,
+      frequency_penalty: currentConfig.gptFrequencyPenalty,
     })
 
     const content = completion.choices[0].message.content
