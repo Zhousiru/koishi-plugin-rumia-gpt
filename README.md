@@ -2,6 +2,14 @@
 
 Yet another simple ChatGPT plugin for Koishi.js.
 
+## 特性
+
+- 多 OpenAI API key 均衡负载
+- 有限上下文保留
+- 自动嵌入用户名称
+- System prompt 日期嵌入
+- 引用原文嵌入
+
 ## 安装
 
 以下命令的工作目录均为 Koishi.js 项目的根目录
