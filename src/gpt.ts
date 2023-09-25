@@ -102,7 +102,12 @@ export function useGpt(session: Session<never, never>): (message: string) => Pro
       frequency_penalty: currentConfig.gptFrequencyPenalty,
     })
 
-    const content = completion.choices[0].message.content
+    let content = completion.choices[0].message.content
+
+    // Filter the response content.
+    for (const [key, value] of Object.entries(currentConfig.filter)) {
+      content = content.replaceAll(key, value)
+    }
 
     pushContextRecord(context, {
       role: 'assistant',

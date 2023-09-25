@@ -1,4 +1,4 @@
-import { Context, Schema, h } from 'koishi'
+import { Context, Dict, Schema, h } from 'koishi'
 import { useGpt } from './gpt'
 
 export const name = 'rumia-gpt'
@@ -17,6 +17,7 @@ export interface Config {
   gptMaxTokens: number
   gptPresencePenalty: number
   gptFrequencyPenalty: number
+  filter: Dict<string, string>
 }
 
 export const Config: Schema<Config> = Schema.object({
@@ -82,6 +83,10 @@ export const Config: Schema<Config> = Schema.object({
     .description(
       "Number between -2.0 and 2.0.<br>Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim."
     ),
+  filter: Schema.dict(String)
+    .default({ '(｡♥‿♥｡)': '(・`ω´・)' })
+    .role('table')
+    .description('Replace the responses of ChatGPT.'),
 })
 
 export let currentConfig: Config | null = null
