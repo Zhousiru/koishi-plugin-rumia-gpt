@@ -19,6 +19,7 @@ export const systemPrompt: ContextData = {
   content: '',
 }
 
+const reservedCount = 2
 const contextMap: Map<string, Array<ContextRecord>> = new Map()
 
 function initContext(session: Session<never, never>): Array<ContextRecord> {
@@ -30,12 +31,28 @@ function initContext(session: Session<never, never>): Array<ContextRecord> {
     addTime: new Date(),
   })
 
+  const { nickname, name } = session.author
+  let username = ''
+  if (nickname) {
+    username = nickname
+  } else {
+    username = name
+  }
+
+  context.push({
+    data: {
+      role: 'system',
+      content: `User's name is ${username}.`,
+    },
+    addTime: new Date(),
+  })
+
   return context
 }
 
 function pushContextRecord(context: Array<ContextRecord>, data: ContextData) {
-  if (context.length - 1 >= currentConfig.contextSize) {
-    context.splice(1, 1)
+  if (context.length - reservedCount >= currentConfig.contextSize) {
+    context.splice(reservedCount, 1)
   }
 
   context.push({
@@ -96,4 +113,20 @@ export function useGpt(session: Session<never, never>): (message: string) => Pro
   }
 
   return ask
+}
+
+export function clearContext(session: Session<never, never>) {
+  contextMap.delete(session.userId)
+}
+
+export function getContext(session: Session<never, never>): string {
+  if (!contextMap.has(session.userId)) {
+    return 'No context for you.'
+  }
+
+  return contextMap
+    .get(session.userId)
+    .slice(reservedCount)
+    .map((record) => `${record.data.role}:\n${record.data.content}`)
+    .join('\n\n')
 }
