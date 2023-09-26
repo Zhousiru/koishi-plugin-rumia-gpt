@@ -25,12 +25,14 @@ Yet another simple ChatGPT plugin for Koishi.js.
    使用 Yarn：
 
    ```
+   yarn install
    yarn build rumia-gpt
    ```
 
    使用 NPM：
 
    ```
+   npm install
    npm run build rumia-gpt
    ```
 
